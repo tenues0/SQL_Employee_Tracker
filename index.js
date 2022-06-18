@@ -25,7 +25,7 @@
 // WHEN I choose to update an employee role
 // THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 
-
+require('dotenv').config();
 // need inquirer package for questions
 const inquirer = require('inquirer');
 // need File System library to use writeFile
@@ -34,9 +34,34 @@ const fs = require('fs');
 // mysql2 will hepl to create a connection to the database
 const mysql = require('mysql2');
 
+// Connect to database
+const db = mysql.createConnection(
+    {
+      // do I copy paste the server.js code in here for a connection?
+      host: 'localhost',
+      // MySQL username,
+      user: 'root',
+      // TODO: Add MySQL password here
+      password: process.env.DB_PASSWORD,
+      database: 'employees_db'
+    },
+    console.log(`Connected to the employees_db database.`)
+  );
 
-
-
+const doMore = () => {
+    inquirer.prompt([{
+        type: 'confirm',
+        name: 'continue',
+        message: 'Would you like to do more?',
+    }]).then(answer => {
+        if (answer.continue) {
+            baseQuestion();
+        } else {
+            console.log('Quit selected');
+            process.exit(0);
+        }
+    });
+};
 
 // function for database questions
 const baseQuestion = () => {
@@ -52,15 +77,40 @@ const baseQuestion = () => {
         // do some more stuff with the answers
         if (answer.options === 'view all departments') {
             // print department table to the console
-            console.table(department);
+            db.connect(function(err) {
+                if (err) throw err;
+                console.log("Connected!");
+                db.query(`SELECT * FROM department`, function (err, result) {
+                  if (err) throw err;
+                  console.table(result);
+                });
+              });
             // rerun the baseQuestion function
-            baseQuestion();
+            doMore();
         }
         if (answer.options === 'view all roles') {
-            console.table(role);
-        }
+            db.connect(function(err) {
+                if (err) throw err;
+                console.log("Connected!");
+                db.query(`SELECT * FROM role`, function (err, result) {
+                  if (err) throw err;
+                  console.table(result);
+                });
+              });
+            // rerun the baseQuestion function
+            doMore();
+            }
         if (answer.options === 'view all employees') {
-            console.table(employee);
+            db.connect(function(err) {
+                if (err) throw err;
+                console.log("Connected!");
+                db.query(`SELECT * FROM employee`, function (err, result) {
+                  if (err) throw err;
+                  console.table(result);
+                });
+              });
+            // rerun the baseQuestion function
+            doMore();
         }
         if (answer.options === 'add a department') {
             // addDepartment();
@@ -68,7 +118,7 @@ const baseQuestion = () => {
         if (answer.options === 'add a role') {
             // addRole();
         }
-        if (answer.options === 'add a employee') {
+        if (answer.options === 'add an employee') {
             // addEmployee();
         }
         if (answer.options === 'update an employee role') {
@@ -78,13 +128,29 @@ const baseQuestion = () => {
             console.log('Quit selected');
             process.exit(0);
         }
+        // Do I need a catch all statement here? else if?
     });
 };
+
+// const addDepartment = () => {
+//     inquirer.prompt([
+//         {
+
+//         },
+//     ])
+// }
+
 
 // call the baseQuestion function to start the program
 baseQuestion();
 
 
 // ????????????????
+// Do I code with an index.js and a server.js or just a server.js?
 // How do I print the SQL tables out the the console?
 // How do I connect with the SQL database?
+// How do I write a function that can interact with the database?
+// do I need to go to a URL to interact with the SQL?
+
+
+
