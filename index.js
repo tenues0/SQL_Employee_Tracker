@@ -48,6 +48,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the employees_db database.`)
   );
 
+// This function reruns the baseQuestion function after an answer is selected
 const doMore = () => {
     inquirer.prompt([{
         type: 'confirm',
@@ -83,10 +84,10 @@ const baseQuestion = () => {
                 db.query(`SELECT * FROM department`, function (err, result) {
                   if (err) throw err;
                   console.table(result);
+                    // rerun the baseQuestion function
+                    doMore();
                 });
               });
-            // rerun the baseQuestion function
-            doMore();
         }
         if (answer.options === 'view all roles') {
             db.connect(function(err) {
@@ -95,10 +96,10 @@ const baseQuestion = () => {
                 db.query(`SELECT * FROM role`, function (err, result) {
                   if (err) throw err;
                   console.table(result);
+                    // rerun the baseQuestion function
+                    doMore();
                 });
               });
-            // rerun the baseQuestion function
-            doMore();
             }
         if (answer.options === 'view all employees') {
             db.connect(function(err) {
@@ -107,13 +108,13 @@ const baseQuestion = () => {
                 db.query(`SELECT * FROM employee`, function (err, result) {
                   if (err) throw err;
                   console.table(result);
+                    // rerun the baseQuestion function
+                    doMore();
                 });
               });
-            // rerun the baseQuestion function
-            doMore();
         }
         if (answer.options === 'add a department') {
-            // addDepartment();
+            addDepartment();
         }
         if (answer.options === 'add a role') {
             // addRole();
@@ -132,25 +133,27 @@ const baseQuestion = () => {
     });
 };
 
-// const addDepartment = () => {
-//     inquirer.prompt([
-//         {
+// what questions need to be asked to add a department
 
-//         },
-//     ])
-// }
-
+const addDepartment = () => {
+    inquirer.prompt([{
+        type: 'input',
+        name: 'adding_new_department',
+        message: 'What is the name of the department?',
+    }]).then(answer => {
+        console.log(answer);
+        db.connect(function(err) {
+            if (err) throw err;
+            console.log("Connected!");
+            db.query(`INSERT INTO department (name) VALUES (?)`,[answer.adding_new_department],  function (err, result) {
+              if (err) throw err;
+              console.table(result);
+                // rerun the baseQuestion function
+                doMore();
+            });
+          });
+    });
+};
 
 // call the baseQuestion function to start the program
 baseQuestion();
-
-
-// ????????????????
-// Do I code with an index.js and a server.js or just a server.js?
-// How do I print the SQL tables out the the console?
-// How do I connect with the SQL database?
-// How do I write a function that can interact with the database?
-// do I need to go to a URL to interact with the SQL?
-
-
-
