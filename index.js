@@ -37,13 +37,12 @@ const mysql = require('mysql2');
 // Connect to database
 const db = mysql.createConnection(
     {
-      // do I copy paste the server.js code in here for a connection?
       host: 'localhost',
       // MySQL username,
-      user: 'root',
+      user: process.env.DB_USER,
       // TODO: Add MySQL password here
       password: process.env.DB_PASSWORD,
-      database: 'employees_db'
+      database: process.env.DB_NAME
     },
     console.log(`Connected to the employees_db database.`)
   );
@@ -141,31 +140,25 @@ const addDepartment = () => {
         message: 'What is the name of the department?',
     }]).then(answer => {
         console.log(answer);
-        db.connect(function(err) {
+        db.query(`INSERT INTO department (name) VALUES (?)`,[answer.adding_new_department],  function (err, result) {
             if (err) throw err;
-            console.log("Connected!");
-            db.query(`INSERT INTO department (name) VALUES (?)`,[answer.adding_new_department],  function (err, result) {
-              if (err) throw err;
-              console.table(result);
-                // rerun the baseQuestion function
-                doMore();
-            });
-          });
+              // rerun the baseQuestion function
+              doMore();
+        });
     });
 };
 
+// ORDER BY id
 // function for adding a role to the role table
 const addRole = () => {
     const department_list = [];
-    db.connect(function(err) {
-        if (err) throw err;
-        console.log("Getting departments from database!");
-        db.query(`SELECT name FROM employees_db.department`,  function (err, departments) {
+        db.query(`SELECT name FROM department;`,  function (err, departments) {
           if (err) throw err;
-          department_list = departments;
+          department_list.push(JSON.stringify(departments));
+        //   const new_department_list = JSON.stringify(department_list[0]);
           console.log(department_list);
+
         });
-      });
     inquirer.prompt([
         {
         type: 'input',
@@ -181,20 +174,16 @@ const addRole = () => {
         type: 'list',
         name: 'adding_role_to_department',
         message: 'What department does the role belong to?',
-        choices: [department_list],
+        choices: department_list,
         },
     ]).then(answer => {
         console.log(answer);
-        db.connect(function(err) {
-            if (err) throw err;
-            console.log("Connected!");
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`,[answer.adding_new_role, answer.adding_new_salary, department_list.indexOf(answer.choices)],  function (err, result) {
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`,[answer.adding_new_role, answer.adding_new_salary, department_list.indexOf(answer.adding_role_to_department)+1],  function (err, result) {
               if (err) throw err;
               console.table(result);
                 // rerun the baseQuestion function
                 doMore();
             });
-          });
     });
 };
 
