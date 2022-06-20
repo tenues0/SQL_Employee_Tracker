@@ -117,7 +117,7 @@ const baseQuestion = () => {
             addDepartment();
         }
         if (answer.options === 'add a role') {
-            // addRole();
+            addRole();
         }
         if (answer.options === 'add an employee') {
             // addEmployee();
@@ -133,8 +133,7 @@ const baseQuestion = () => {
     });
 };
 
-// what questions need to be asked to add a department
-
+// function for adding a department to the department table 
 const addDepartment = () => {
     inquirer.prompt([{
         type: 'input',
@@ -146,6 +145,50 @@ const addDepartment = () => {
             if (err) throw err;
             console.log("Connected!");
             db.query(`INSERT INTO department (name) VALUES (?)`,[answer.adding_new_department],  function (err, result) {
+              if (err) throw err;
+              console.table(result);
+                // rerun the baseQuestion function
+                doMore();
+            });
+          });
+    });
+};
+
+// function for adding a role to the role table
+const addRole = () => {
+    const department_list = [];
+    db.connect(function(err) {
+        if (err) throw err;
+        console.log("Getting departments from database!");
+        db.query(`SELECT name FROM employees_db.department`,  function (err, departments) {
+          if (err) throw err;
+          department_list = departments;
+          console.log(department_list);
+        });
+      });
+    inquirer.prompt([
+        {
+        type: 'input',
+        name: 'adding_new_role',
+        message: 'What is the name of the new role?',
+        },
+        {
+        type: 'input',
+        name: 'adding_new_salary',
+        message: 'What is the salary of the new role?',
+        },
+        {
+        type: 'list',
+        name: 'adding_role_to_department',
+        message: 'What department does the role belong to?',
+        choices: [department_list],
+        },
+    ]).then(answer => {
+        console.log(answer);
+        db.connect(function(err) {
+            if (err) throw err;
+            console.log("Connected!");
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`,[answer.adding_new_role, answer.adding_new_salary, department_list.indexOf(answer.choices)],  function (err, result) {
               if (err) throw err;
               console.table(result);
                 // rerun the baseQuestion function
