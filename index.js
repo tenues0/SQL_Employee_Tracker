@@ -148,16 +148,15 @@ const addDepartment = () => {
     });
 };
 
-// ORDER BY id
 // function for adding a role to the role table
 const addRole = () => {
     const department_list = [];
         db.query(`SELECT name FROM department;`,  function (err, departments) {
           if (err) throw err;
-          department_list.push(JSON.stringify(departments));
-        //   const new_department_list = JSON.stringify(department_list[0]);
+          for (let i = 0; i < departments.length; i++) {
+            department_list.push(departments[i].name);
+          }
           console.log(department_list);
-
         });
     inquirer.prompt([
         {
