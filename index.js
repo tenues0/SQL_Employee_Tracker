@@ -47,6 +47,13 @@ const db = mysql.createConnection(
     console.log(`Connected to the employees_db database.`)
   );
 
+
+// Global variables
+const manager_list = [];
+
+
+
+
 // This function reruns the baseQuestion function after an answer is selected
 const doMore = () => {
     inquirer.prompt([{
@@ -55,6 +62,9 @@ const doMore = () => {
         message: 'Would you like to do more?',
     }]).then(answer => {
         if (answer.continue) {
+            // update the manager list
+            managerUpdate();
+            // start the first question for the program over again
             baseQuestion();
         } else {
             console.log('Quit selected');
@@ -62,6 +72,20 @@ const doMore = () => {
         }
     });
 };
+
+function managerUpdate() {
+    db.query(`SELECT first_name, last_name FROM employee WHERE manager_id IS NOT NULL`, function (err, managers) {
+        if (err) throw err;
+        // console.log(managers);
+        for (let j = 0; index < managers.length; index++) {
+            manager_list.push(managers[j].first_name, managers[j].last_name);
+        }
+        return manager_list;
+        
+    });
+};
+
+
 
 // function for database questions
 const baseQuestion = () => {
@@ -119,7 +143,7 @@ const baseQuestion = () => {
             addRole();
         }
         if (answer.options === 'add an employee') {
-            // addEmployee();
+            addEmployee();
         }
         if (answer.options === 'update an employee role') {
             // updateEmployeeRole(employee);
@@ -185,6 +209,125 @@ const addRole = () => {
             });
     });
 };
+
+
+
+// function for adding an employee to the employee table
+// copy and paste the addrole function
+// modify the addrole function
+//
+// need to pull in manager names for the employee to be assigned
+// need to code then statement
+//
+
+
+
+
+const addEmployee = () => {
+    const role_list = [];
+        db.query(`SELECT title FROM role;`,  function (err, roles) {
+          if (err) throw err;
+          for (let i = 0; i < roles.length; i++) {
+            role_list.push(roles[i].title);
+          }
+          console.log(role_list);
+        });
+
+    inquirer.prompt([
+        {
+        type: 'input',
+        name: 'adding_new_role',
+        message: 'What is the name of the new role?',
+        },
+        {
+        type: 'input',
+        name: 'adding_new_salary',
+        message: 'What is the salary of the new role?',
+        },
+        {
+        type: 'list',
+        name: 'adding_role_to_department',
+        message: 'What department does the role belong to?',
+        choices: role_list,
+        },
+    ]).then(answer => {
+        console.log(answer);
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`,[answer.adding_new_role, answer.adding_new_salary, role_list.indexOf(answer.adding_role_to_department)+1],  function (err, result) {
+              if (err) throw err;
+              console.table(result);
+                // rerun the baseQuestion function
+                doMore();
+            });
+    });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const addEmployee = () => {
+//     const role_list = [];
+//     // const manager_list = [];
+//         db.query(`SELECT title FROM role;`,  function (err, roles) {
+//           if (err) throw err;
+//           for (let i = 0; i < roles.length; i++) {
+//             role_list.push(roles[i].title);
+//           }
+//           console.log("department_list", department_list);
+//         });
+    
+//     // db.query(`SELECT manager_id FROM employee;`, function (err, managers) {
+//     //     if (err) throw err;
+//     //     for (let j = 0; index < managers.length; index++) {
+//     //         manager_list.push(managers[j].manager_id);
+//     //         console.log("manager_list", manager_list);
+//     //     }
+//     // });
+
+//     inquirer.prompt([
+//         {
+//         type: 'input',
+//         name: 'first_name',
+//         message: 'What is the employee\'s first name?',
+//         },
+//         {
+//         type: 'input',
+//         name: 'last_name',
+//         message: 'What is the employee\'s last name?',
+//         },
+//         {
+//         type: 'list',
+//         name: 'adding_employee_role',
+//         message: 'What is the employee\s role?',
+//         choices: role_list,
+//         },
+//         // {
+//         // type: 'list',
+//         // name: 'adding_employees_manager',
+//         // message: 'Who is the employee\s manager?',
+//         // choices: manager_list,
+//         // },    , manager_list.indexOf(answer.adding_employees_manager)+1
+//     ]).then(answers => {
+//         console.log(answers);
+//             db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
+//             [answers.first_name, answers.last_name, role_list.indexOf(answers.adding_employee_role)+1],  function (err, result) {
+//               if (err) throw err;
+//               console.table(result);
+//                 // rerun the baseQuestion function
+//                 doMore();
+//             });
+//     });
+// };
+
+
 
 // call the baseQuestion function to start the program
 baseQuestion();
