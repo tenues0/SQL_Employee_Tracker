@@ -134,7 +134,7 @@ const baseQuestion = () => {
             addEmployee();
         }
         if (answer.options === 'update an employee role') {
-            // updateEmployeeRole(employee);
+            updateEmployeeRole();
         }
         if (answer.options === 'quit') {
             console.log('Quit selected');
@@ -206,14 +206,19 @@ const addEmployee = () => {
           for (let i = 0; i < roles.length; i++) {
             role_list.push(roles[i].title);
           }
-          console.log('\n', role_list);
+        //   console.log('\n', role_list);
         });
-        db.query(`SELECT first_name, last_name, role_id FROM employee WHERE manager_id IS NULL`, function (err, managers) {
+        // everyone can be a manager, so the manager list needs to be everyone from the start
+        // if the employee turns out to be a manager, then their manager is set to NULL
+        db.query(`SELECT first_name, last_name, id FROM employee`, function (err, managers) {
             if (err) throw err;
             for (let j = 0; j < managers.length; j++) {
-                manager_list.push(managers[j].first_name + managers[j].last_name + managers[j].role_id);
+                // populating the array with the managers
+                manager_list.push(managers[j].first_name + ' ' + managers[j].last_name + ', The employee\'s ID is:' + managers[j].id);
+                // adding null to the list of choices for managers
+                // manager_list.unshift('null');
             }
-            console.log('\n', manager_list);
+            // console.log('\n', manager_list);
         });
     inquirer.prompt([
         {
@@ -229,13 +234,13 @@ const addEmployee = () => {
         {
         type: 'list',
         name: 'adding_employee_role',
-        message: 'What is the employee\s role?',
+        message: 'What is the employee\'s role?',
         choices: role_list,
         },
         {
         type: 'list',
         name: 'adding_employees_manager',
-        message: 'Who is the employee\s manager?',
+        message: 'Who is the employee\'s manager?',
         choices: manager_list,
         },
     ]).then(answers => {
@@ -254,7 +259,46 @@ const addEmployee = () => {
 
 
 
-
+const updateEmployeeRole = () => {
+    const employee_list = [];
+    const role_list = [];
+    db.query(`SELECT first_name, last_name, role_id FROM employee`, function (err, employees) {
+        if (err) throw err;
+        for (let k = 0; k < employees.length; k++) {
+            employee_list.push(employees[k].first_name + ' ' + employees[k].last_name+ ', Employee Role ID is:' + employees[k].role_id);
+        }
+        console.log('\n', employee_list);
+    });
+        db.query(`SELECT title FROM role;`,  function (err, roles) {
+          if (err) throw err;
+          for (let i = 0; i < roles.length; i++) {
+            role_list.push(roles[i].title);
+          }
+    });
+    inquirer.prompt([
+        {
+        type: 'list',
+        name: 'which_employee',
+        message: 'Which employee\'s role do you want to update?',
+        choices: employee_list,
+        },
+        {
+        type: 'list',
+        name: 'new_employee_role',
+        message: 'What is the employee\'s role?',
+        choices: role_list,
+        },
+    ]).then(answers => {
+        console.log(answers);
+            db.query(`UPDATE employee SET role_id = (role_id) WHERE id = (id)  VALUES (?, ?)`,
+                [role_list.indexOf(answers.new_employee_role)+1, employee_list.indexOf(answers.which_employee)],  function (err, result) {
+              if (err) throw err;
+              console.table(result);
+                // rerun the baseQuestion function
+                doMore();
+            });
+    });
+};
 
 // call the baseQuestion function to start the program
 baseQuestion();
