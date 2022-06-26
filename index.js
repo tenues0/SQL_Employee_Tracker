@@ -210,13 +210,13 @@ const addEmployee = () => {
         });
         // everyone can be a manager, so the manager list needs to be everyone from the start
         // if the employee turns out to be a manager, then their manager is set to NULL
-        db.query(`SELECT first_name, last_name, id FROM employee`, function (err, managers) {
+        db.query(`SELECT first_name, last_name, id FROM employee;`, function (err, managers) {
             if (err) throw err;
             for (let j = 0; j < managers.length; j++) {
                 // populating the array with the managers
                 manager_list.push(managers[j].first_name + ' ' + managers[j].last_name + ', The employee\'s ID is:' + managers[j].id);
                 // adding null to the list of choices for managers
-                // manager_list.unshift('null');
+                // manager_list.push('null');
             }
             // console.log('\n', manager_list);
         });
@@ -259,39 +259,40 @@ const addEmployee = () => {
 
 
 
+
 const updateEmployeeRole = () => {
     const employee_list = [];
-    const role_list = [];
-    db.query(`SELECT first_name, last_name, role_id FROM employee`, function (err, employees) {
+    const e_role_list = [];
+    db.query(`SELECT first_name, last_name, role_id FROM employee;`, function (err, employees) {
         if (err) throw err;
         for (let k = 0; k < employees.length; k++) {
             employee_list.push(employees[k].first_name + ' ' + employees[k].last_name+ ', Employee Role ID is:' + employees[k].role_id);
         }
-        console.log('\n', employee_list);
+        // console.log('\n', employee_list);
     });
         db.query(`SELECT title FROM role;`,  function (err, roles) {
           if (err) throw err;
           for (let i = 0; i < roles.length; i++) {
-            role_list.push(roles[i].title);
+            e_role_list.push(roles[i].title);
           }
     });
     inquirer.prompt([
         {
-        type: 'list',
-        name: 'which_employee',
-        message: 'Which employee\'s role do you want to update?',
-        choices: employee_list,
+            type: 'list',
+            name: 'which_employee',
+            message: 'Which employee\'s role do you want to update?',
+            choices: employee_list,
         },
         {
-        type: 'list',
-        name: 'new_employee_role',
-        message: 'What is the employee\'s role?',
-        choices: role_list,
+            type: 'list',
+            name: 'new_employee_role',
+            message: 'What is the employee\'s new role?',
+            choices: e_role_list,
         },
-    ]).then(answers => {
-        console.log(answers);
+    ]).then(ans => {
+        console.log(ans);
             db.query(`UPDATE employee SET role_id = (role_id) WHERE id = (id)  VALUES (?, ?)`,
-                [role_list.indexOf(answers.new_employee_role)+1, employee_list.indexOf(answers.which_employee)],  function (err, result) {
+                [e_role_list.indexOf(ans.new_employee_role)+1, employee_list.indexOf(ans.which_employee)+1],  function (err, result) {
               if (err) throw err;
               console.table(result);
                 // rerun the baseQuestion function
