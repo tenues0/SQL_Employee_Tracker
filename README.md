@@ -18,6 +18,10 @@ This is a content management system (CMS) written in javascript. The command lin
 
 The app is command line based.
 
+Video link to program functionality and usage is below:
+
+https://drive.google.com/file/d/1Y69UyFHxVN2kuXFAme_zQuDNBt4iicDY/view
+
 ## Contributing
 
 The user can fork the repo for further development.
