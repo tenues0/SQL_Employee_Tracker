@@ -258,47 +258,49 @@ const addEmployee = () => {
 
 
 
-
-
+// + ', Employee Role ID is:' + employees[k].role_id
+// this funciton won't display choices for the user to select
 const updateEmployeeRole = () => {
     const employee_list = [];
     const e_role_list = [];
-    db.query(`SELECT first_name, last_name, role_id FROM employee;`, function (err, employees) {
+    db.query(`SELECT first_name, last_name FROM employee;`, function (err, employees) {
         if (err) throw err;
         for (let k = 0; k < employees.length; k++) {
-            employee_list.push(employees[k].first_name + ' ' + employees[k].last_name+ ', Employee Role ID is:' + employees[k].role_id);
+            employee_list.push(employees[k].first_name + ' ' + employees[k].last_name);
         }
-        // console.log('\n', employee_list);
-    });
+        console.log('\n', employee_list);
         db.query(`SELECT title FROM role;`,  function (err, roles) {
           if (err) throw err;
           for (let i = 0; i < roles.length; i++) {
             e_role_list.push(roles[i].title);
           }
+          console.log("****",employee_list)
+          inquirer.prompt([
+              {
+                  type: 'list',
+                  name: 'which_employee',
+                  message: 'Which employee\'s role do you want to update?',
+                  choices: employee_list,
+              },
+              {
+                  type: 'list',
+                  name: 'new_employee_role',
+                  message: 'What is the employee\'s new role?',
+                  choices: e_role_list,
+              },
+          ]).then(ans => {
+              console.log(ans);
+                  db.query(`UPDATE employee SET role_id = (role_id) WHERE id = (id)  VALUES (?, ?)`,
+                      [e_role_list.indexOf(ans.new_employee_role)+1, employee_list.indexOf(ans.which_employee)+1],  function (err, result) {
+                    if (err) throw err;
+                    console.table(result);
+                      // rerun the baseQuestion function
+                      doMore();
+                  });
+          });
     });
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'which_employee',
-            message: 'Which employee\'s role do you want to update?',
-            choices: employee_list,
-        },
-        {
-            type: 'list',
-            name: 'new_employee_role',
-            message: 'What is the employee\'s new role?',
-            choices: e_role_list,
-        },
-    ]).then(ans => {
-        console.log(ans);
-            db.query(`UPDATE employee SET role_id = (role_id) WHERE id = (id)  VALUES (?, ?)`,
-                [e_role_list.indexOf(ans.new_employee_role)+1, employee_list.indexOf(ans.which_employee)+1],  function (err, result) {
-              if (err) throw err;
-              console.table(result);
-                // rerun the baseQuestion function
-                doMore();
-            });
     });
+
 };
 
 // call the baseQuestion function to start the program
