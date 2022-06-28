@@ -290,7 +290,7 @@ const updateEmployeeRole = () => {
               },
           ]).then(ans => {
               console.log(ans);
-                  db.query(`UPDATE employee SET role_id = (role_id) WHERE id = (id)  VALUES (?, ?)`,
+                  db.query(`UPDATE employee SET role_id=? WHERE id=?`,
                       [e_role_list.indexOf(ans.new_employee_role)+1, employee_list.indexOf(ans.which_employee)+1],  function (err, result) {
                     if (err) throw err;
                     console.table(result);
